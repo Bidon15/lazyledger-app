@@ -2,8 +2,6 @@ package app
 
 import (
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -153,14 +151,17 @@ var (
 	_ servertypes.Application = (*App)(nil)
 )
 
-func init() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
+// func init() {
+// 	fmt.Println(os.Environ())
+// 	userHomeDir, _ := os.UserHomeDir()
+// 	fmt.Println(userHomeDir)
+// 	fmt.Println("--------------")
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
 
-	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
-}
+// 	DefaultNodeHome = "/Users/bidon4/testground/celestia-app"
+// }
 
 // App extends an ABCI application, but with most of its parameters exported.
 // They are exported for convenience in creating helper functions, as object
