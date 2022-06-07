@@ -11,7 +11,7 @@ func TestWirePayForData_ValidateBasic(t *testing.T) {
 	type test struct {
 		name    string
 		msg     *MsgWirePayForData
-		wantErr *sdkerrors.Error
+		wantErr *errorsmod.Error
 	}
 
 	// valid pfd
