@@ -1,11 +1,15 @@
 package cli
 
 import (
-	"encoding/hex"
+	"bytes"
 	"errors"
 	"fmt"
+	"strconv"
 
+	"github.com/celestiaorg/nmt/namespace"
 	"github.com/spf13/cobra"
+	tmrand "github.com/tendermint/tendermint/libs/rand"
+	"github.com/tendermint/tendermint/pkg/consts"
 
 	"github.com/celestiaorg/celestia-app/x/payment/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -18,9 +22,9 @@ const FlagSquareSizes = "square-sizes"
 
 func CmdWirePayForData() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "payForData [hexNamespace] [hexMessage]",
-		Short: "Creates a new MsgWirePayForData",
-		Args:  cobra.ExactArgs(2),
+		Use:   "payForData [hexMessageSize]",
+		Short: "Creates a new MsgWirePayForData with random namespace and random msg size-defined(bytes) by the user",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -33,19 +37,14 @@ func CmdWirePayForData() *cobra.Command {
 				return errors.New("no account name provided, please use the --from flag")
 			}
 
-			// decode the namespace
-			namespace, err := hex.DecodeString(args[0])
-			if err != nil {
-				return fmt.Errorf("failure to decode hex namespace: %w", err)
-			}
-
 			// decode the message
-			message, err := hex.DecodeString(args[1])
+			size, err := strconv.Atoi(args[0])
 			if err != nil {
-				return fmt.Errorf("failure to decode hex message: %w", err)
+				return fmt.Errorf("failure to decode message size: %w", err)
 			}
 
-			pfdMsg, err := types.NewWirePayForData(namespace, message, types.AllSquareSizes(len(message))...)
+			randMsg := GetRandomMessageBySize(size)
+			pfdMsg, err := types.NewWirePayForData(GetRandomNamespace(), randMsg, types.AllSquareSizes(len(randMsg))...)
 			if err != nil {
 				return err
 			}
@@ -100,4 +99,17 @@ func CmdWirePayForData() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
+}
+
+func GetRandomNamespace() namespace.ID {
+	for {
+		s := tmrand.Bytes(8)
+		if bytes.Compare(s, consts.MaxReservedNamespace) > 0 {
+			return s
+		}
+	}
+}
+
+func GetRandomMessageBySize(size int) []byte {
+	return tmrand.Bytes(size)
 }
