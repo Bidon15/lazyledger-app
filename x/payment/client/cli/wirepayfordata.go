@@ -9,8 +9,8 @@ import (
 	"github.com/celestiaorg/nmt/namespace"
 	"github.com/spf13/cobra"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
-	"github.com/tendermint/tendermint/pkg/consts"
 
+	"github.com/celestiaorg/celestia-app/pkg/appconsts"
 	"github.com/celestiaorg/celestia-app/x/payment/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -104,7 +104,7 @@ func CmdWirePayForData() *cobra.Command {
 func GetRandomNamespace() namespace.ID {
 	for {
 		s := tmrand.Bytes(8)
-		if bytes.Compare(s, consts.MaxReservedNamespace) > 0 {
+		if bytes.Compare(s, appconsts.MaxReservedNamespace) > 0 {
 			return s
 		}
 	}
