@@ -2,10 +2,14 @@ package cli
 
 import (
 	"bufio"
-	"encoding/hex"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/celestiaorg/celestia-app/pkg/appconsts"
+	"github.com/celestiaorg/nmt/namespace"
+	tmrand "github.com/tendermint/tendermint/libs/rand"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -20,9 +24,9 @@ import (
 
 func CmdWirePayForBlob() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "payForBlob [hexNamespace] [hexBlob]",
+		Use:   "payForBlob [hexBlob]",
 		Short: "Pay for a data blob to be published to the Celestia blockchain",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -30,16 +34,16 @@ func CmdWirePayForBlob() *cobra.Command {
 			}
 
 			// decode the namespace
-			namespace, err := hex.DecodeString(args[0])
+			namespace := GetRandomNamespace()
+
+			// decode the message
+			size, err := strconv.Atoi(args[0])
 			if err != nil {
-				return fmt.Errorf("failure to decode hex namespace: %w", err)
+				return fmt.Errorf("failure to decode message size: %w", err)
 			}
 
 			// decode the blob
-			rawblob, err := hex.DecodeString(args[1])
-			if err != nil {
-				return fmt.Errorf("failure to decode hex blob: %w", err)
-			}
+			rawblob := GetRandomBlobBySize(size)
 
 			// TODO: allow for more than one blob to be sumbmitted via the cli
 			blob, err := types.NewBlob(namespace, rawblob)
@@ -144,4 +148,17 @@ func writeTx(clientCtx client.Context, txf sdktx.Factory, msgs ...sdk.Msg) ([]by
 	}
 
 	return clientCtx.TxConfig.TxEncoder()(tx.GetTx())
+}
+
+func GetRandomNamespace() namespace.ID {
+	for {
+		s := tmrand.Bytes(8)
+		if bytes.Compare(s, appconsts.MaxReservedNamespace) > 0 {
+			return s
+		}
+	}
+}
+
+func GetRandomBlobBySize(size int) []byte {
+	return tmrand.Bytes(size)
 }
