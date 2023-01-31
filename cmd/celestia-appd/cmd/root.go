@@ -47,6 +47,7 @@ const EnvPrefix = "CELESTIA"
 // main function.
 func NewRootCmd() *cobra.Command {
 	encodingConfig := encoding.MakeConfig(app.ModuleEncodingRegisters...)
+	app.SealAccountPrefixes()
 
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
@@ -130,8 +131,6 @@ func initAppConfig() (string, interface{}) {
 }
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig encoding.Config) {
-	cfg := sdk.GetConfig()
-	cfg.Seal()
 
 	debugCmd := debug.Cmd()
 

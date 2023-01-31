@@ -182,8 +182,6 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
-
-	sealAccountPrefixes()
 }
 
 // App extends an ABCI application, but with most of its parameters exported.
@@ -723,7 +721,7 @@ func moduleMapToSlice(m module.BasicManager) []encoding.ModuleRegister {
 	return s
 }
 
-func sealAccountPrefixes() {
+func SealAccountPrefixes() {
 	cfg := sdk.GetConfig()
 	cfg.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
 	cfg.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
